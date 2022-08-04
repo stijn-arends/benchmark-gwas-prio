@@ -1,5 +1,14 @@
 # NetWAS - network-wide association study
 
+NetWas is a method to re-prioritize genes based on tissue-specific networks. It combines genes with nominally significant genome-wide association study (GWAS) P values and tissue-specific networks to identify disease-gene associations more accurately than GWAS alone. It provides a useful reprioritization of the genome in terms of phenotypic and functional association $^{[1]}$.
+
+webservice: https://hb.flatironinstitute.org/netwas 
+
+**[1]** Greene CS*, Krishnan A*, Wong AK*, Ricciotti E, Zelaya RA, Himmelstein DS, Zhang R, Hartmann BM, Zaslavsky E, Sealfon SC, Chasman DI, FitzGerald GA, Dolinski K, Grosser T, Troyanskaya OG. (2015). Understanding multicellular function and disease with human tissue-specific networks. Nature Genetics. [10.1038/ng.3259w](https://www.nature.com/articles/ng.3259).
+
+
+## Getting Started
+
 The following scripts are used to process the results produced by NetWAS:
 1. parse_netwas_results.py
 2. convert_gene_id_ensembl_id.R
@@ -31,9 +40,9 @@ Inside the tratis section are all the results of NetWAS sepcified for different 
 
 ## Example output NetWAS
 
-<div align="center">
+<div align="left">
   <a href="https://humanbase.readthedocs.io/en/latest/netwas.html">
-    <img src="../../images/netwas_example.png" alt="Logo" width="100%">
+    <img src="../../images/netwas_example.png" alt="Logo" width="80%">
   </a>
 </div>
 
