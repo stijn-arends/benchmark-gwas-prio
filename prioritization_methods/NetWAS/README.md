@@ -12,6 +12,8 @@ To check how the python script works you can look at the help function:
 python3 parse_netwas_results.py -h
 ```
 
+## Example output NetWAS
+
 #########################################################  
 &#35; HumanBase NetWAS Analysis Results  
 &#35;  
@@ -45,12 +47,13 @@ python3 parse_netwas_results.py -h
 &#35; 10.1038/ng.3259w.
 ######################################################### 
 
-| --------- | ------- | --------- | 
-| KRT6B     | -1      | 0.561327  |
-| EMP1      | -1      | 0.541169  |
-| ZBTB41    | -1      | 0.503238  |
-| PNPLA8    | -1      | 0.454396  |
-| ITGB4     | -1      | 0.440985  |
+| Gene symbol | Training label | Score |  
+| ----------- | -------------- | --------- | 
+| KRT6B       | -1             | 0.561327  |
+| EMP1        | -1             | 0.541169  |
+| ZBTB41      | -1             | 0.503238  |
+| PNPLA8      | -1             | 0.454396  |
+| ITGB4       | -1             | 0.440985  |
 
 
 The next step is to convert the gene symbols
