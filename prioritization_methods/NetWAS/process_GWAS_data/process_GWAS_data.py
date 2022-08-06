@@ -1,3 +1,13 @@
+"""
+This module is designed to prepare GWAS summary statistics data for running the
+Versatile Gene-based Association Study (VEGAS2) software. 
+
+VEGAS requires as input a GWAS summary statistics file containing rs SNP IDs and p values.
+
+link: https://vegas2.qimrberghofer.edu.au/
+"""
+
+
 import pandas as pd
 import numpy as np
 from fuzzywuzzy import fuzz
@@ -76,9 +86,15 @@ class PrepGWASData:
         self.vegas = vegas
         self.df = self.prepare_data(Path(file))
 
-        
     def prepare_data(self, file):
-        
+        """
+        Prepare the GWAS summstats data by activating a chain of commands.
+
+        :parameter
+        ----------
+        file - Path
+            GWAS summstats file
+        """
         df = self.read_data(file)
         
         df = self.select_columns(df)
@@ -94,9 +110,30 @@ class PrepGWASData:
         
     @staticmethod
     def read_data(file):
+        """
+        Read a tab seperated file into a pandas data frame
+
+        :parameter
+        ----------
+        file - Path
+            GWAS summstats file
+        """
         return pd.read_csv(file, sep="\t", low_memory=False)
     
     def select_columns(self, df):
+        """
+        Select the SNP ID and p value columns from the file.
+
+        :parameter
+        ----------
+        df - pd.DataFrame
+            GWAS summstats file
+
+        :returns
+        --------
+        df - pd.DataFrame
+            Dataframe only containing SNP and pvalue columns
+        """
         self.vegas.find_column_names(df)
     
         cols = self.vegas.get_col_names()
@@ -108,14 +145,53 @@ class PrepGWASData:
     
     @staticmethod
     def drop_nan(df):
+        """
+        Drop all the NaN values in a data frame.
+
+        :parameter
+        ----------
+        df - pd.DataFrame
+            data frame
+
+        :returns
+        --------
+        df - pd.DataFrame
+            data frame without NaN values
+        """
         return df.dropna()
     
     @staticmethod
     def filter_rs_id(df):
+        """
+        Filter out all the rows that do not contain rs SNP identifiers.
+
+        :parameter
+        ----------
+        df - pd.DataFrame
+            data frame
+
+        :returns
+        --------
+        df - pd.DataFrame
+            Dataframe only containing rs SNP identifiers
+        """
         return df[df.iloc[:, 0].str.startswith("rs")]
     
     @staticmethod
     def set_index(df):
+        """
+        Set the SNP column as the index and sort it.
+
+        :parameter
+        ----------
+        df - pd.DataFrame
+            data frame
+
+        :returns
+        --------
+        df - pd.DataFrame
+            Dataframe with the SNP column as the index
+        """
         df.set_index(df.iloc[:,0], drop=True, inplace=True)
         df.drop(columns=df.columns[0], axis=1, inplace=True)
         df.sort_index(inplace=True)
