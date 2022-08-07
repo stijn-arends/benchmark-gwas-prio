@@ -43,6 +43,14 @@ class ConfigValidator:
             if not Path(info["file"]).is_file():
                 raise FileNotFoundError(f'Input file does not exist:\n{info["file"]}')
 
+    def validate_output_exists(self) -> None:
+        """
+        Check if the output location exists. 
+        """
+        file = Path(self.config["output"])
+        if not file.exists():
+            file.mkdir(parents=True)
+
     def validate_column_names(self) -> None:
         """
         Validate that the given names for the SNP and pvalue columns 
