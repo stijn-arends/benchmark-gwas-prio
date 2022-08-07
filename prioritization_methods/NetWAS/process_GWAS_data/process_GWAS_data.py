@@ -13,9 +13,25 @@ import numpy as np
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 from pathlib import Path
+import yaml
+
+from validate_config import ConfigValidator
 
 __author__ = "Stijn Arends"
 __version__ = "v.01"
+
+
+class AutomaticColumnExtractError(Exception):
+    """Exception raised if the ExtractVEGASColumns class fails to extract the correct column names from 
+    the data.
+    Attributes:
+        message -- explanation of the error
+    """
+
+    def __init__(self, cols: int) -> None:
+        self.message = f"The program could not find the correct column name, found: {cols}." \
+        " Please make sure to specify the correct name inside the config file."
+        super().__init__(self.message)
 
 
 class ExtractVEGASColumns:
@@ -82,7 +98,9 @@ class ExtractVEGASColumns:
 
 class PrepGWASData:
     
-    def __init__(self, file, vegas):
+    def __init__(self, file, vegas, snp_col, pval_col):
+        self.snp_col = snp_col
+        self.pval_col = pval_col
         self.vegas = vegas
         self.df = self.prepare_data(Path(file))
 
@@ -97,7 +115,14 @@ class PrepGWASData:
         """
         df = self.read_data(file)
         
-        df = self.select_columns(df)
+        if self.snp_col == 'None' or self.pval_col == 'None':
+            df = self.select_columns(df)
+        else:
+            try:
+                df = df.loc[:, [self.snp_col, self.pval_col]]
+            except KeyError:
+                print("Specified column(s) are not found, trying to find them automatically...")
+                df = self.select_columns(df)
         
         # Drop NaN
         df = self.drop_nan(df)
@@ -105,7 +130,8 @@ class PrepGWASData:
         df = self.filter_rs_id(df)
         
         df = self.set_index(df)
-        print(df)
+
+        return df
         
         
     @staticmethod
@@ -137,8 +163,10 @@ class PrepGWASData:
         self.vegas.find_column_names(df)
     
         cols = self.vegas.get_col_names()
-        
-        # Select SNP ID and p-val column
+
+        if not set(cols).issubset(df.columns):
+            raise AutomaticColumnExtractError(cols)
+
         df = df.loc[:, cols]
         
         return df
@@ -196,3 +224,59 @@ class PrepGWASData:
         df.drop(columns=df.columns[0], axis=1, inplace=True)
         df.sort_index(inplace=True)
         return df
+
+
+def get_config(file):
+    """
+    Read in config file and return it as a dictionary.
+    
+    :parameter
+    ----------
+    file - str
+        Configuration file in yaml format
+
+    :returns
+    --------
+    config - dict
+        Configuration file in dictionary form.
+    """
+    with open(Path(file), 'r') as stream:
+        config = yaml.safe_load(stream)
+    return config
+
+
+def write_out_df(file, df):
+    df.to_csv(file, header=False, sep="\t")
+
+def main():
+    file = "config.yaml"
+
+    # trait_data = get_config(file)
+
+    validator = ConfigValidator("config.yaml")
+    validator.validate_config_file()
+    trait_data = validator.config
+
+
+
+    vegas = ExtractVEGASColumns()
+
+    for trait, info in trait_data["traits"].items():
+        
+        snp = info["columns"]["snp"]
+        pval = info["columns"]["pval"]
+
+        assert snp == "None" or isinstance(snp, str), "The SNP column must be either None or a string"
+        assert pval == "None" or isinstance(pval, str), "The pval column must be either None or a string"
+
+        prep_gwas = PrepGWASData(info["file"], vegas, snp, pval)
+
+        output_file = Path(trait_data["output"]) / (trait + "_vegas_input.txt")
+        write_out_df(output_file, prep_gwas.df)
+
+
+
+
+
+if __name__ == "__main__":
+    main()
