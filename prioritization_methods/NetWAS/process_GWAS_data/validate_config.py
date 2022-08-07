@@ -31,7 +31,23 @@ class ConfigValidator:
             config = yaml.safe_load(stream)
         return config
 
-    def validate_column_names(self):
+    def validate_config_file(self) -> None:
+        self.validate_input_exists()
+        self.validate_column_names()
+
+    def validate_input_exists(self) -> None:
+        """
+        Check if a file exists. 
+        """
+        for info in self.config["traits"].values():
+            if not Path(info["file"]).is_file():
+                raise FileNotFoundError(f'Input file does not exist:\n{info["file"]}')
+
+    def validate_column_names(self) -> None:
+        """
+        Validate that the given names for the SNP and pvalue columns 
+        are actually inside of the corresponding file. 
+        """
         for trait, info in self.config["traits"].items():
             print(trait)
             snp = info["columns"]["snp"]
@@ -53,7 +69,8 @@ def main():
     file = "C:\\Users\\stijn\\Documents\\Master_DSLS\\Semester_two\\project\\data\\prostate_cancer\\meta_v3_onco_euro_overall_ChrAll_1_release_full.txt"
     # print(linecache.getline(file, 1))
 
-    validator.validate_column_names()
+
+    validator.validate_config_file()
 
 
 if __name__ == "__main__":
