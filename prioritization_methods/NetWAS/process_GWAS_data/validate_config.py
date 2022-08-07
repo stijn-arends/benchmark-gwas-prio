@@ -33,6 +33,7 @@ class ConfigValidator:
 
     def validate_config_file(self) -> None:
         self.validate_input_exists()
+        self.validate_output_exists()
         self.validate_column_names()
 
     def validate_input_exists(self) -> None:
@@ -56,8 +57,7 @@ class ConfigValidator:
         Validate that the given names for the SNP and pvalue columns 
         are actually inside of the corresponding file. 
         """
-        for trait, info in self.config["traits"].items():
-            print(trait)
+        for info in self.config["traits"].values():
             snp = info["columns"]["snp"]
             pval = info["columns"]["pval"]
 
