@@ -3,11 +3,9 @@ This module is designed to validate the contents of the configuration file assoc
 with the script processing the GWAS summstats files for VEGAS. 
 """
 
-from msilib.schema import File
 import yaml
 import linecache
 from pathlib import Path
-
 
 class ConfigValidator:
 
@@ -77,7 +75,6 @@ class ConfigValidator:
             if not set([snp, pval]).issubset(columns):
                 print(f"WARNING! The set value for the SNP and/or p value ({snp}, {pval}) column are not found amongst the column names of the corresponding file." \
                     " The program will try to automatically detect the correct column.")
-
 
 
 def main():
