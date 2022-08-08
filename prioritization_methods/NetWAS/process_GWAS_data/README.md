@@ -3,7 +3,7 @@
 
 ## Description
 * * *
-These scripts are designed to process GWAS data to be able to run the Versatile Gene-based Association Study (VEGAS2) software [$^{[1]}$](#refrences). The GWAS summary statistics are required to be processed with VEGAS to be able to run NetWAS on the data. This is because NetWAS requires p-value per gene level data instead of the original p-value per SNP data. 
+These scripts are designed to process GWAS data to be able to run the Versatile Gene-based Association Study (VEGAS2) software [[1]](#refrences). The GWAS summary statistics are required to be processed with VEGAS to be able to run NetWAS on the data. This is because NetWAS requires p-value per gene level data instead of the original p-value per SNP data. 
 
 In order to run VEGAS the GWAS summary statistics must only contain two columns: SNP id and p-value, in a tab seperated file that does not contain any NaN values or a header.
 
@@ -34,9 +34,9 @@ The actual executable (perl script) can be found [here](https://vegas2.qimrbergh
 * * *
 As mentioned before these scripts can only be used to prepare the data for VEGAS and not for actually running the VEGAS software. 
 
-The [`process_GWAS_data.py`](process_GWAS_data.py) script is the script which processes the data and puts it into the correct format. This script requires a configuration file to be located in the same directory with the name [config.yaml](config.yaml).
+The [`process_GWAS_data.py`](process_GWAS_data.py) script is the script which processes the data and puts it into the correct format. This script requires a configuration file to be located in the same directory with the name [`config.yaml`](config.yaml).
 
-The [validate_config.py](validate_config.py) script is an util script which checks if the configuration file is correct. 
+The [`validate_config.py`](validate_config.py) script is an util script which checks if the configuration file is correct. 
 
 ### Config File
 * * *
