@@ -3,6 +3,7 @@ This module is designed to validate the contents of the configuration file assoc
 with the script processing the GWAS summstats files for VEGAS. 
 """
 
+from msilib.schema import File
 import yaml
 import linecache
 from pathlib import Path
@@ -11,7 +12,7 @@ from pathlib import Path
 class ConfigValidator:
 
     def __init__(self, config):
-        self.config = self.get_config(config)
+        self.config = self.get_config(Path(config))
 
     def get_config(self, file):
         """
@@ -27,11 +28,18 @@ class ConfigValidator:
         config - dict
             Configuration file in dictionary form.
         """
-        with open(Path(file), 'r') as stream:
+        if not file.exists():
+            raise FileExistsError(f"The file that was supplied does not exists: {file}")
+
+        with open(file, 'r') as stream:
             config = yaml.safe_load(stream)
+
         return config
 
     def validate_config_file(self) -> None:
+        """
+        Validate the content of the configuration file.
+        """
         self.validate_input_exists()
         self.validate_output_exists()
         self.validate_column_names()
@@ -74,10 +82,6 @@ class ConfigValidator:
 
 def main():
     validator = ConfigValidator("config.yaml")
-    file = "C:\\Users\\stijn\\Documents\\Master_DSLS\\Semester_two\\project\\data\\prostate_cancer\\meta_v3_onco_euro_overall_ChrAll_1_release_full.txt"
-    # print(linecache.getline(file, 1))
-
-
     validator.validate_config_file()
 
 
