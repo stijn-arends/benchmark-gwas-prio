@@ -9,11 +9,9 @@ link: https://vegas2.qimrberghofer.edu.au/
 
 
 import pandas as pd
-import numpy as np
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 from pathlib import Path
-import yaml
 
 from validate_config import ConfigValidator
 
@@ -104,7 +102,18 @@ class PrepGWASData:
         self.vegas = vegas
         self.df = self.prepare_data(Path(file))
 
-    def prepare_data(self, file):
+    def get_df(self) -> pd.DataFrame:
+        """
+        Return the data frame
+
+        :returns
+        --------
+        df - pd.DataFrame
+            The data in a data frame
+        """
+        return self.df
+
+    def prepare_data(self, file) -> pd.DataFrame:
         """
         Prepare the GWAS summstats data by activating a chain of commands.
 
@@ -226,38 +235,25 @@ class PrepGWASData:
         return df
 
 
-def get_config(file):
-    """
-    Read in config file and return it as a dictionary.
-    
-    :parameter
-    ----------
-    file - str
-        Configuration file in yaml format
-
-    :returns
-    --------
-    config - dict
-        Configuration file in dictionary form.
-    """
-    with open(Path(file), 'r') as stream:
-        config = yaml.safe_load(stream)
-    return config
-
-
 def write_out_df(file, df):
+    """
+    Write out a data frame to a csv file.
+
+    :parameters
+    -----------
+    file - Path
+        Location of the output file
+    df - pd.DataFrame
+        Tab seperated data
+    """
     df.to_csv(file, header=False, sep="\t")
 
 def main():
     file = "config.yaml"
 
-    # trait_data = get_config(file)
-
-    validator = ConfigValidator("config.yaml")
+    validator = ConfigValidator(file)
     validator.validate_config_file()
     trait_data = validator.config
-
-
 
     vegas = ExtractVEGASColumns()
 
@@ -272,10 +268,7 @@ def main():
         prep_gwas = PrepGWASData(info["file"], vegas, snp, pval)
 
         output_file = Path(trait_data["output"]) / (trait + "_vegas_input.txt")
-        write_out_df(output_file, prep_gwas.df)
-
-
-
+        write_out_df(output_file, prep_gwas.get_df())
 
 
 if __name__ == "__main__":
