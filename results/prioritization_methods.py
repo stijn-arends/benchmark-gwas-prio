@@ -190,3 +190,74 @@ class PoPs(PrioritizationMethod):
         significant_pops = data.sort_values("PoPS_Score", ascending=False).iloc[0:threshold, :]
         significant_genes = significant_pops["ENSGID"]
         return significant_pops, significant_genes
+
+
+class Depict(PrioritizationMethod):
+
+    def __init__(self, hpo, fisher):
+        self.hpo = hpo
+        self.fisher = fisher
+
+    def read_data(self, data):
+        """
+        Read in data from a CSV file.
+
+        :parameters
+        -----------
+        data - Path
+            File containing the data
+
+        :returns
+        --------
+        depict_data - pd.DataFrame
+            Data in a data frame
+        genes - pd.Series
+            Gene IDs
+        """
+        depict_data = pd.read_csv(data, sep="\t")
+        depict_data.columns = depict_data.columns.str.rstrip()
+        depict_data["Ensembl Gene ID"] = depict_data["Ensembl Gene ID"].str.rstrip()
+        depict_data["zscores"] = stats.zscore(depict_data["Nominal P value"], nan_policy='omit')
+        genes = depict_data["Ensembl Gene ID"]
+        return depict_data, genes
+
+    def get_overlap_genes(self, data, genes):
+        """
+        Get the data that overlaps with a list of specified genes.
+
+        :parameters
+        -----------
+        data - pd.DataFrame
+            Data
+        genes - pd.Series
+            List of gene IDs
+
+        :returns
+        --------
+        overlap_depict - pd.DataFrame
+            Data overlapping with specified genes
+        """
+        overlap_depict = data[data["Ensembl Gene ID"].isin(genes)]
+        return overlap_depict
+    
+    def filter_data(self, data, _):
+        """
+        Filter the data by only keeping the 'significant' genes.
+
+        :parameters
+        -----------
+        data - pd.DataFrame
+            Data
+        threshold - float
+            Threshold to determine what significant is.
+
+        :returns
+        --------
+        significant_depict - pd.DataFrame
+            Data containing only the significant genes
+        significant_genes - pd.Series
+            Gene IDs of the significant genes
+        """
+        significant_depict = data[data["False discovery rate < 5%"] == "Yes"]
+        significant_genes = significant_depict["Ensembl Gene ID"]
+        return significant_depict, significant_genes
