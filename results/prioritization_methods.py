@@ -261,3 +261,71 @@ class Depict(PrioritizationMethod):
         significant_depict = data[data["False discovery rate < 5%"] == "Yes"]
         significant_genes = significant_depict["Ensembl Gene ID"]
         return significant_depict, significant_genes
+
+
+class Downstreamer(PrioritizationMethod):
+
+    def __init__(self, hpo, fisher):
+        self.hpo = hpo
+        self.fisher = fisher
+
+    def read_data(self, data):
+        """
+        Read in data from a CSV file.
+
+        :parameters
+        -----------
+        data - Path
+            File containing the data
+
+        :returns
+        --------
+        downstreamer_data - pd.DataFrame
+            Data in a data frame
+        genes - pd.Series
+            Gene IDs
+        """
+        downstreamer_data = pd.read_excel(data, "GenePrioritization")
+        genes = downstreamer_data["Gene ID"]
+        return downstreamer_data, genes
+
+    def get_overlap_genes(self, data, genes):
+        """
+        Get the data that overlaps with a list of specified genes.
+
+        :parameters
+        -----------
+        data - pd.DataFrame
+            Data
+        genes - pd.Series
+            List of gene IDs
+
+        :returns
+        --------
+        overlap_downstreamer - pd.DataFrame
+            Data overlapping with specified genes
+        """
+        overlap_downstreamer = data[data["Gene ID"].isin(genes)]
+        return overlap_downstreamer
+    
+    def filter_data(self, data, _):
+        """
+        Filter the data by only keeping the 'significant' genes.
+
+        :parameters
+        -----------
+        data - pd.DataFrame
+            Data
+        threshold - float
+            Threshold to determine what significant is.
+
+        :returns
+        --------
+        significant_downstreamer - pd.DataFrame
+            Data containing only the significant genes
+        significant_genes - pd.Series
+            Gene IDs of the significant genes
+        """
+        significant_downstreamer = data[data["FDR 5% significant"] == True]
+        significant_genes = significant_downstreamer["Gene ID"]
+        return significant_downstreamer, significant_genes
