@@ -118,6 +118,12 @@ def make_out_dir(path: Path) -> None:
         print(f"[{make_out_dir.__name__}] {path} already exists.")
 
 
+def write_out_data(data: pd.DataFrame, file: Path) -> None:
+    """
+    Write out a pandas data frame to a file
+    """
+    data.to_csv(file, sep="\t")
+
 
 def main():
     
@@ -132,36 +138,40 @@ def main():
 
     config = get_config(Path(config_file))
 
-    make_out_dir(Path(output_dir) / method)
+    out_dir = Path(output_dir) / method
+
+    make_out_dir(out_dir)
 
     hpo_data = r"C:\Users\stijn\Documents\Master_DSLS\Semester_two\project\HPO\phenotype_to_genes_V1268_OMIMandORPHA.txt_matrix.txt.gz"
     hpo_info = r"C:\Users\stijn\Documents\Master_DSLS\Semester_two\project\comparing_methods\HPO_table.csv"
 
     methods = {"NetWAS": NetWAS, "PoPs": PoPs, "DEPICT": Depict, "Downstreamer": Downstreamer, "MAGMA":Magma}
 
-    print(config)
-
     hpo = HPO(database=hpo_data, hpo_info=hpo_info)
     fisher = FisherTest()
 
     method_instance = methods[method](hpo=hpo, fisher=fisher)
 
-    # print(config["traits"]["Height"])
-    file = Path(config["traits"]["Height"])
+    for trait, file in config["traits"].items():
+        print(f"Processing trait: {trait}")
+        file = Path(file)
 
-    magma_height, magma_height_genes = method_instance.read_data(file)
+        method_data, genes = method_instance.read_data(file)
 
-    overlap_hpo_magma, magma_genes_height, total_overlap = method_instance.get_overlap(hpo.hpo_data, magma_height_genes)
-    # overlap_hpo_magma
+        overlap_hpo, overlap_genes, total_overlap = method_instance.get_overlap(hpo.hpo_data, genes)
+        # overlap_hpo_magma
 
-    overlap_magma_height = method_instance.get_overlap_genes(magma_height, magma_genes_height)
-    # overlap_magma_height
+        overlap_method = method_instance.get_overlap_genes(method_data, overlap_genes)
+        # overlap_magma_height
 
-    sig_magma_height, sig_magma_height_genes = method_instance.filter_data(overlap_magma_height)
-    # sig_magma_height
+        sig_data_method, sig_genes = method_instance.filter_data(overlap_method)
+        # sig_magma_height
 
-    magma_height_fish = method_instance.fisher.perform_fisher_exact_tests(overlap_hpo_magma, sig_magma_height_genes, hpo.hpo_info_data)
-    print(magma_height_fish)
+        fish_results = method_instance.fisher.perform_fisher_exact_tests(overlap_hpo, sig_genes, hpo.hpo_info_data)
+        
+        out_file = out_dir / ("fisher_result_" + file.stem + ".csv")
+
+        write_out_data(fish_results, out_file)
 
 
 
