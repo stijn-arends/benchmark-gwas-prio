@@ -7,9 +7,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import scipy.stats as stats
+import yaml
 
 from arg_parser import ArgumentParser, CLIArgValidator
-from results.prioritization_methods import Downstreamer, Magma, Depict, PoPs, NetWAS
+from prioritization_methods import Downstreamer, Magma, Depict, PoPs, NetWAS
 
 __author__ = "Stijn Arends"
 __version__ = "v0.1"
@@ -78,22 +79,89 @@ class FisherTest:
         return hpo_scores
 
 
+def get_config(file):
+    """
+    Read in config file and return it as a dictionary.
+    
+    :parameter
+    ----------
+    file - str
+        Configuration file in yaml format
+
+    :returns
+    --------
+    config - dict
+        Configuration file in dictionary form.
+    """
+    if not file.exists():
+        raise FileExistsError(f"The file that was supplied does not exists: {file}")
+
+    with open(file, 'r') as stream:
+        config = yaml.safe_load(stream)
+
+    return config
+
+
+def make_out_dir(path: Path) -> None:
+    """
+    Create a directory (if it does not exsit yet) to store the 
+    data.
+
+    :Excepts
+    --------
+    FileExistsError
+        The directory already exists
+    """
+    try:
+        path.mkdir(parents=True, exist_ok=False)
+    except FileExistsError:
+        print(f"[{make_out_dir.__name__}] {path} already exists.")
+
+
+
 def main():
     
     arg_parse = ArgumentParser()
 
-    config = arg_parse.get_argument("c")
+    config_file = arg_parse.get_argument("c")
     method = arg_parse.get_argument("m")
     output_dir = arg_parse.get_argument("o")
 
     cli_validator = CLIArgValidator()
+    cli_validator.validate_input_file(config_file)
 
-    cli_validator.validate_input_file(config)
+    config = get_config(Path(config_file))
+
+    make_out_dir(Path(output_dir) / method)
 
     hpo_data = r"C:\Users\stijn\Documents\Master_DSLS\Semester_two\project\HPO\phenotype_to_genes_V1268_OMIMandORPHA.txt_matrix.txt.gz"
     hpo_info = r"C:\Users\stijn\Documents\Master_DSLS\Semester_two\project\comparing_methods\HPO_table.csv"
 
     methods = {"NetWAS": NetWAS, "PoPs": PoPs, "DEPICT": Depict, "Downstreamer": Downstreamer, "MAGMA":Magma}
+
+    print(config)
+
+    hpo = HPO(database=hpo_data, hpo_info=hpo_info)
+    fisher = FisherTest()
+
+    method_instance = methods[method](hpo=hpo, fisher=fisher)
+
+    # print(config["traits"]["Height"])
+    file = Path(config["traits"]["Height"])
+
+    magma_height, magma_height_genes = method_instance.read_data(file)
+
+    overlap_hpo_magma, magma_genes_height, total_overlap = method_instance.get_overlap(hpo.hpo_data, magma_height_genes)
+    # overlap_hpo_magma
+
+    overlap_magma_height = method_instance.get_overlap_genes(magma_height, magma_genes_height)
+    # overlap_magma_height
+
+    sig_magma_height, sig_magma_height_genes = method_instance.filter_data(overlap_magma_height)
+    # sig_magma_height
+
+    magma_height_fish = method_instance.fisher.perform_fisher_exact_tests(overlap_hpo_magma, sig_magma_height_genes, hpo.hpo_info_data)
+    print(magma_height_fish)
 
 
 
