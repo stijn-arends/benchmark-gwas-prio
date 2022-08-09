@@ -329,3 +329,71 @@ class Downstreamer(PrioritizationMethod):
         significant_downstreamer = data[data["FDR 5% significant"] == True]
         significant_genes = significant_downstreamer["Gene ID"]
         return significant_downstreamer, significant_genes
+
+
+class Magma(PrioritizationMethod):
+
+    def __init__(self, hpo, fisher):
+        self.hpo = hpo
+        self.fisher = fisher
+
+    def read_data(self, data):
+        """
+        Read in data from a CSV file.
+
+        :parameters
+        -----------
+        data - Path
+            File containing the data
+
+        :returns
+        --------
+        magma_data - pd.DataFrame
+            Data in a data frame
+        genes - pd.Series
+            Gene IDs
+        """
+        magma_data = pd.read_csv(data, sep='\s\s+', engine='python')
+        genes = magma_data["GENE"]
+        return magma_data, genes
+
+    def get_overlap_genes(self, data, genes):
+        """
+        Get the data that overlaps with a list of specified genes.
+
+        :parameters
+        -----------
+        data - pd.DataFrame
+            Data
+        genes - pd.Series
+            List of gene IDs
+
+        :returns
+        --------
+        overlap_magma - pd.DataFrame
+            Data overlapping with specified genes
+        """
+        overlap_magma = data[data["GENE"].isin(genes)]
+        return overlap_magma
+    
+    def filter_data(self, data, threshold=1.084e-4):
+        """
+        Filter the data by only keeping the 'significant' genes.
+
+        :parameters
+        -----------
+        data - pd.DataFrame
+            Data
+        threshold - float
+            Threshold to determine what gene is significant.
+
+        :returns
+        --------
+        significant_magma - pd.DataFrame
+            Data containing only the significant genes
+        significant_genes - pd.Series
+            Gene IDs of the significant genes
+        """
+        significant_magma = data[data["P"] < threshold]
+        significant_genes = significant_magma["GENE"]
+        return significant_magma, significant_genes
