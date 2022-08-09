@@ -103,7 +103,7 @@ class NetWAS(PrioritizationMethod):
 
     def filter_data(self, data, threshold=0.5):
         """
-        Get the data that overlaps with a list of specified genes.
+        Filter the data by only keeping the 'significant' genes.
 
         :parameters
         -----------
@@ -122,3 +122,71 @@ class NetWAS(PrioritizationMethod):
         significant_netwas = data[data.netwas_score > threshold]
         significant_genes = significant_netwas.ensemble_id
         return significant_netwas, significant_genes
+
+
+class PoPs(PrioritizationMethod):
+
+    def __init__(self, hpo, fisher):
+        self.hpo = hpo
+        self.fisher = fisher
+
+    def read_data(self, data):
+        """
+        Read in data from a CSV file.
+
+        :parameters
+        -----------
+        data - Path
+            File containing the data
+
+        :returns
+        --------
+        pops_data - pd.DataFrame
+            Data in a data frame
+        genes - pd.Series
+            Gene IDs
+        """
+        pops_data = pd.read_csv(data, sep="\t")
+        genes = pops_data["ENSGID"]
+        return pops_data, genes
+
+    def get_overlap_genes(self, data, genes):
+        """
+        Get the data that overlaps with a list of specified genes.
+
+        :parameters
+        -----------
+        data - pd.DataFrame
+            Data
+        genes - pd.Series
+            List of gene IDs
+
+        :returns
+        --------
+        overlap_pops - pd.DataFrame
+            Data overlapping with specified genes
+        """
+        overlap_pops = data[data["ENSGID"].isin(genes)]
+        return overlap_pops
+    
+    def filter_data(self, data, threshold=500.0):
+        """
+        Filter the data by only keeping the 'significant' genes.
+
+        :parameters
+        -----------
+        data - pd.DataFrame
+            Data
+        threshold - float
+            Threshold to determine what significant is.
+
+        :returns
+        --------
+        significant_pops - pd.DataFrame
+            Data containing only the significant genes
+        significant_genes - pd.Series
+            Gene IDs of the significant genes
+        """
+        significant_pops = data.sort_values("PoPS_Score", ascending=False).iloc[0:threshold, :]
+        significant_genes = significant_pops["ENSGID"]
+        return significant_pops, significant_genes
