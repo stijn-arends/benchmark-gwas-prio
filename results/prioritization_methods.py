@@ -54,3 +54,71 @@ class PrioritizationMethod(ABC):
         # Only keep releveant HPO data
         overlap_hpo = hpo_data[hpo_data.index.isin(overlapping_genes)]
         return overlap_hpo, overlap_genes, total_overlap
+
+
+class NetWAS(PrioritizationMethod):
+
+    def __init__(self, hpo, fisher):
+        self.hpo = hpo
+        self.fisher = fisher
+
+    def read_data(self, data):
+        """
+        Read in data from a CSV file.
+
+        :parameters
+        -----------
+        data - Path
+            File containing the data
+
+        :returns
+        --------
+        netwas_data - pd.DataFrame
+            Data in a data frame
+        genes - pd.Series
+            Gene IDs
+        """
+        netwas_data = pd.read_csv(data, sep=",")
+        genes = netwas_data.ensemble_id
+        return netwas_data, genes
+
+    def get_overlap_genes(self, data, genes):
+        """
+        Get the data that overlaps with a list of specified genes.
+
+        :parameters
+        -----------
+        data - pd.DataFrame
+            Data
+        genes - pd.Series
+            List of gene IDs
+
+        :returns
+        --------
+        overlap_netwas - pd.DataFrame
+            Data overlapping with specified genes
+        """
+        overlap_netwas = data[data.ensemble_id.isin(genes)]
+        return overlap_netwas
+
+    def filter_data(self, data, threshold=0.5):
+        """
+        Get the data that overlaps with a list of specified genes.
+
+        :parameters
+        -----------
+        data - pd.DataFrame
+            Data
+        threshold - float
+            Threshold to determine what significant is.
+
+        :returns
+        --------
+        significant_netwas - pd.DataFrame
+            Data containing only the significant genes
+        significant_genes - pd.Series
+            Gene IDs of the significant genes
+        """
+        significant_netwas = data[data.netwas_score > threshold]
+        significant_genes = significant_netwas.ensemble_id
+        return significant_netwas, significant_genes
