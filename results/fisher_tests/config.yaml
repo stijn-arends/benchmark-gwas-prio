@@ -1,0 +1,4 @@
+traits:
+  Height: "C:\\Users\\stijn\\Documents\\Master_DSLS\\Semester_two\\project\\software_methods\\NetWas\\results\\height\\height_netwas_ensembl.csv"
+  IBD: "C:\\Users\\stijn\\Documents\\Master_DSLS\\Semester_two\\project\\software_methods\\NetWas\\results\\IBD\\ibd_netwas_ensembl.csv"
+  PrC: "C:\\Users\\stijn\\Documents\\Master_DSLS\\Semester_two\\project\\software_methods\\NetWas\\results\\prostate\\prostate_netwas_ensembl.csv"
