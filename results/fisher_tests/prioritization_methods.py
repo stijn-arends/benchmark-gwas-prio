@@ -169,7 +169,7 @@ class PoPs(PrioritizationMethod):
         overlap_pops = data[data["ENSGID"].isin(genes)]
         return overlap_pops
     
-    def filter_data(self, data, threshold=500.0):
+    def filter_data(self, data, threshold=500):
         """
         Filter the data by only keeping the 'significant' genes.
 
@@ -240,7 +240,7 @@ class Depict(PrioritizationMethod):
         overlap_depict = data[data["Ensembl Gene ID"].isin(genes)]
         return overlap_depict
     
-    def filter_data(self, data, _):
+    def filter_data(self, data, threshold = None):
         """
         Filter the data by only keeping the 'significant' genes.
 
@@ -308,7 +308,7 @@ class Downstreamer(PrioritizationMethod):
         overlap_downstreamer = data[data["Gene ID"].isin(genes)]
         return overlap_downstreamer
     
-    def filter_data(self, data, _):
+    def filter_data(self, data, threshold = None):
         """
         Filter the data by only keeping the 'significant' genes.
 

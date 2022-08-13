@@ -23,6 +23,9 @@ class HPO:
     hpo_info: Path
 
     def __post_init__(self) -> None:
+        """
+        Read in the HPO database and the HPO info.
+        """
         self.hpo_data = pd.read_csv(self.database, compression='gzip', sep="\t")
         self.hpo_data.set_index('-', inplace=True)
         self.hpo_info_data = pd.read_csv(self.hpo_info, sep=",")
@@ -30,13 +33,23 @@ class HPO:
 
 class FisherTest:
 
-    def __init__(self):
-        pass
-
-
-    def create_fisher_table(self, overlap_genes, gwas_genes, hpo_genes):
+    def create_fisher_table(self, overlap_genes: pd.Series, gwas_genes: pd.Series, hpo_genes: pd.Series) -> pd.DataFrame:
         """
-        Create a 2x2 contingency table needed for fisher exact test
+        Create a 2x2 contingency table needed for fisher exact test.
+
+        :parameters
+        -----------
+        overlap_genes - pd.Series
+            List of genes that overlap with the HPO database and results of a prioritization method.
+        gwas_genes - pd.Series
+            List of significant genes
+        hpo_genes - pd.Series
+            List of HPO genes
+
+        :returns
+        --------
+        metrix - pd.DataFrame
+            2x2 contingency table
         """
         tl = overlap_genes[~overlap_genes.isin(gwas_genes) & ~overlap_genes.isin(hpo_genes)].shape[0]
         bl = overlap_genes[overlap_genes.isin(gwas_genes) & ~overlap_genes.isin(hpo_genes)].shape[0]
@@ -50,10 +63,25 @@ class FisherTest:
         metrix.index = ["No GWAS", "Yes GWAS", "sum"]
         return metrix
 
-    def perform_fisher_exact_tests(self, hpo_data, gene_data, hpo_info):
+    def perform_fisher_exact_tests(self, hpo_data: pd.DataFrame, gene_data: pd.Series, hpo_info: pd.DataFrame) -> pd.DataFrame:
         """
         Perform fisher's exact test on the intersect of the HPO genes, and
         genes produced by a gene prioritization method.
+
+        :parameters
+        -----------
+        hpo_data - pd.DataFrame
+            HPO metric inside a pandas data frame
+        gene_data - pd.Series
+            List of genes
+        hpo_info - pd.DataFrame
+            A data frame containing the name of the GWAS trait, Related HPO term, and HPO ID
+
+        :returns
+        --------
+        hpo_scores - pd.DataFrame
+            The original hpo_info data frame with some additional information: OR and p values from the fisher exact test
+            and zscores from the p values.
         """
         hpo_scores = hpo_info.copy()
         odds_ratios = []
@@ -79,7 +107,7 @@ class FisherTest:
         return hpo_scores
 
 
-def get_config(file):
+def get_config(file: Path) -> dict:
     """
     Read in config file and return it as a dictionary.
     
@@ -107,6 +135,11 @@ def make_out_dir(path: Path) -> None:
     Create a directory (if it does not exsit yet) to store the 
     data.
 
+    :parameter
+    ----------
+    path - Path
+        Location of directory
+
     :Excepts
     --------
     FileExistsError
@@ -120,7 +153,14 @@ def make_out_dir(path: Path) -> None:
 
 def write_out_data(data: pd.DataFrame, file: Path) -> None:
     """
-    Write out a pandas data frame to a file
+    Write out a pandas data frame to a file.
+
+    :parameters
+    -----------
+    data - pd.DataFrame
+        Data
+    file - Path
+        Name and location of output file
     """
     data.to_csv(file, sep="\t")
 
@@ -142,8 +182,8 @@ def main():
 
     make_out_dir(out_dir)
 
-    hpo_data = r"C:\Users\stijn\Documents\Master_DSLS\Semester_two\project\HPO\phenotype_to_genes_V1268_OMIMandORPHA.txt_matrix.txt.gz"
-    hpo_info = r"C:\Users\stijn\Documents\Master_DSLS\Semester_two\project\comparing_methods\HPO_table.csv"
+    hpo_data = config["hpo_data"]
+    hpo_info = config["hpo_info"]
 
     methods = {"NetWAS": NetWAS, "PoPs": PoPs, "DEPICT": Depict, "Downstreamer": Downstreamer, "MAGMA":Magma}
 
@@ -159,20 +199,16 @@ def main():
         method_data, genes = method_instance.read_data(file)
 
         overlap_hpo, overlap_genes, total_overlap = method_instance.get_overlap(hpo.hpo_data, genes)
-        # overlap_hpo_magma
 
         overlap_method = method_instance.get_overlap_genes(method_data, overlap_genes)
-        # overlap_magma_height
 
         sig_data_method, sig_genes = method_instance.filter_data(overlap_method)
-        # sig_magma_height
 
         fish_results = method_instance.fisher.perform_fisher_exact_tests(overlap_hpo, sig_genes, hpo.hpo_info_data)
         
         out_file = out_dir / ("fisher_result_" + file.stem + ".csv")
 
         write_out_data(fish_results, out_file)
-
 
 
 if __name__ == "__main__":
