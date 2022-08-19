@@ -1,7 +1,0 @@
-2x2 contingency table:
-          No HPO  Yes HPO    sum
-No GWAS    16671      623  17294
-Yes GWAS     173       12    185
-sum        16844      635  17479
-
-odds ratio: 1.856131528405348, pvalue: 0.04616335037394272
