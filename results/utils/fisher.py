@@ -7,7 +7,7 @@ import scipy.stats as stats
 @dataclass
 class HPO:
     database: Path
-    hpo_info: Path
+    # hpo_info: Path
 
     def __post_init__(self) -> None:
         """
@@ -15,7 +15,14 @@ class HPO:
         """
         self.hpo_data = pd.read_csv(self.database, compression='gzip', sep="\t")
         self.hpo_data.set_index('-', inplace=True)
-        self.hpo_info_data = pd.read_csv(self.hpo_info, sep=",")
+        # self.hpo_info_data = pd.read_csv(self.hpo_info, sep=",")
+
+
+    def get_data_hpo_term(self, hpo_data, hpo_term):
+        data_hpo_term = hpo_data.loc[hpo_data[hpo_term] == 1, hpo_term]
+        genes = data_hpo_term.index
+        return data_hpo_term, genes
+
 
 
 class FisherTest:
@@ -50,6 +57,10 @@ class FisherTest:
         metrix.index = ["No GWAS", "Yes GWAS", "sum"]
         return metrix
 
+    def fishers_exact_test(self, fisher_data):
+        odds_ratio, p_val = stats.fisher_exact(fisher_data)
+        return odds_ratio, p_val
+
     def perform_fisher_exact_tests(self, hpo_data: pd.DataFrame, gene_data: pd.Series, hpo_info: pd.DataFrame) -> pd.DataFrame:
         """
         Perform fisher's exact test on the intersect of the HPO genes, and
@@ -79,7 +90,7 @@ class FisherTest:
                 hpo_genes = hpo_data.loc[hpo_data[hpo] == 1, hpo].index
                 fisher_data = self.create_fisher_table(hpo_data.index, gene_data, hpo_genes).iloc[0:2, 0:2].values
 
-                odds_ratio, p_val = stats.fisher_exact(fisher_data)
+                odds_ratio, p_val = self.fishers_exact_test(fisher_data)
             except KeyError:
                 odds_ratio, p_val = np.nan, np.nan
                 
