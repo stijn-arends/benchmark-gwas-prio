@@ -1,18 +1,9 @@
 """
 Perform fisher's exact tests on the results from a number of prioritization methods.
-
-Idea:
-create a function that can write out the fisher results to a file and a function that will print the results based on which mode the user selected.
-
-to-do:
-Add documentation to the methods/functions
 """
 
 import sys
 from pathlib import Path
-# import numpy as np
-# import pandas as pd
-# import scipy.stats as stats
 import yaml
 import os
 
@@ -32,30 +23,38 @@ from utils.fisher import HPO, FisherTest
 
 class VennDiagram:
 
-    def __init__(self, n_hpo_genes, n_method_genes, total_overlap) -> None:
-        self.n_hpo_genes = n_hpo_genes
-        self.n_method_genes = n_method_genes
-        self.total_overlap = total_overlap
+    def __init__(self, n_sig_genes, n_hpo_term_genes, overlap_sig_hpo) -> None:
+        self.n_sig_genes = n_sig_genes
+        self.n_hpo_term_genes= n_hpo_term_genes
+        self.overlap_sig_hpo = overlap_sig_hpo
 
-    def __plot_venn_diagram(self):
+    def __plot_venn_diagram(self) -> None:
         """
-        Perhaps create two seperate functions, one for saving the plot and the other for showing.
-        Or add an output dir to the function, or make a class for this and save the output dir there.
+        Plot a venn diagram with three circles
         """
-
-        # depict venn diagram
-        venn2(subsets=(self.n_hpo_genes, self.n_method_genes, self.total_overlap), 
+        venn2(subsets=(self.n_sig_genes, self.n_hpo_term_genes, self.overlap_sig_hpo), 
             set_labels=('HPO genes', 'GWAS genes'),
             set_colors=("silver", "lightsteelblue"), alpha=0.7)
 
-        venn2_circles(subsets=(self.n_hpo_genes, self.n_method_genes, self.total_overlap),
+        venn2_circles(subsets=(self.n_sig_genes, self.n_hpo_term_genes, self.overlap_sig_hpo),
                     linewidth=1)
 
-    def show(self):
+    def show(self) -> None:
+        """
+        Show the venn diagram on screen.
+        """
         self.__plot_venn_diagram()
         plt.show()
 
-    def save(self, output_file):
+    def save(self, output_file) -> None:
+        """
+        Save the venn diagram to a file.
+
+        :parameters
+        -----------
+        output_file - Path
+            Location and name of the output file
+        """
         self.__plot_venn_diagram()
         plt.savefig(output_file)
 
@@ -83,19 +82,65 @@ def get_config(file: Path) -> dict:
     return config
 
 
-def save_fisher_results(file, fisher_table, odds_ratio, pval):
+def make_out_dir(path: Path) -> None:
+    """
+    Create a directory (if it does not exsit yet) to store the 
+    data.
+
+    :parameter
+    ----------
+    path - Path
+        Location of directory
+
+    :Excepts
+    --------
+    FileExistsError
+        The directory already exists
+    """
+    try:
+        path.mkdir(parents=True, exist_ok=False)
+    except FileExistsError:
+        print(f"[{make_out_dir.__name__}] {path} already exists.")
+
+
+def save_fisher_results(file, fisher_table, odds_ratio, pval) -> None:
+    """
+    Save the results of a fisher's exact test to a txt file.
+
+    :parameters
+    -----------
+    file - Path
+        Output file name and location
+    fisher_table - str
+        2x2 contingency table used for the fisher's exact test
+    odds_ratio - float
+        Odds ratio of the fisher's exact test
+    pval - float
+        P value of the fisher's exact test
+    """
     with open(file, 'w') as f:
-        # fish_table = fisher_data.to_string()
         f.write("2x2 contingency table:\n")
         f.write(fisher_table)
-        f.write(f"\nFisher's exact test results:")
+        f.write(f"\\nnFisher's exact test results:\n")
         f.write(f"odds ratio: {odds_ratio}, pvalue: {pval}\n")
 
 
-def print_fisher_results(fisher_table, odds_ratio, pval):
+def print_fisher_results(fisher_table, odds_ratio, pval) -> None:
+    """
+    Print the results of a fisher's exact test to the screen
+
+    :parameters
+    -----------
+    fisher_table - str
+        2x2 contingency table used for the fisher's exact test
+    odds_ratio - float
+        Odds ratio of the fisher's exact test
+    pval - float
+        P value of the fisher's exact test
+    """
     print("2x2 contingency table:\n")
     print(fisher_table)
-    print(f"\nFisher's exact test results:")
+    print(f"\n\nFisher's exact test results:\n")
     print(f"odds ratio: {odds_ratio}, pvalue: {pval}\n")
 
 
@@ -114,6 +159,8 @@ def main():
     cli_validator.validate_input_file(config_file)
     cli_validator._check_arg_combination(output_dir, save_mode)
 
+    make_out_dir(Path(output_dir))
+
     config = get_config(Path(config_file))
 
     methods = {"NetWAS": NetWAS, "PoPs": PoPs, "DEPICT": Depict, "Downstreamer": Downstreamer, "MAGMA":Magma}
@@ -126,48 +173,34 @@ def main():
 
     for trait, info in config["traits"].items():
         print(f"Processing trait: {trait}")
-        if trait == "IBD":
-            file = Path(info["file"])
-            hpo_term = info["hpo_term"]
-            method_data, genes = method_instance.read_data(file)
+        file = Path(info["file"])
+        hpo_term = info["hpo_term"]
+        method_data, genes = method_instance.read_data(file)
 
-            overlap_hpo, overlap_genes, total_overlap = method_instance.get_overlap(hpo.hpo_data, genes)
+        overlap_hpo, overlap_genes, total_overlap = method_instance.get_overlap(hpo.hpo_data, genes)
 
-            overlap_method = method_instance.get_overlap_genes(method_data, overlap_genes)
+        overlap_method = method_instance.get_overlap_genes(method_data, overlap_genes)
 
-            sig_data_method, sig_genes = method_instance.filter_data(overlap_method)
+        sig_data_method, sig_genes = method_instance.filter_data(overlap_method)
 
-            data_hpo_term, genes_hpo_term = hpo.get_data_hpo_term(hpo.hpo_data, hpo_term)
+        data_hpo_term, genes_hpo_term = hpo.get_data_hpo_term(hpo.hpo_data, hpo_term)
 
-            n_hpo_genes = len(hpo.hpo_data)
-            # print(f"Number of hpo genes: {n_hpo_genes}")
+        fisher_data = fisher.create_fisher_table(overlap_genes, sig_genes, genes_hpo_term)
+        fisher_table = fisher_data.to_string()
 
-            # print(f"Number of total netwas IBD genes: {len(genes)}")
+        OR, pval = fisher.fishers_exact_test(fisher_data.iloc[0:2, 0:2].values)
 
-            # print(f"Genes overlapping with HPO: {total_overlap}")
+        n_significant_genes = len(sig_genes)
+        n_hpo_term_genes = len(genes_hpo_term)
+        overlap_sig_hpo = fisher_data.iloc[1, 1]
+        venn_diagram = VennDiagram(n_significant_genes, n_hpo_term_genes, overlap_sig_hpo)
 
-            fisher_data = fisher.create_fisher_table(overlap_genes, sig_genes, genes_hpo_term)# .iloc[0:2, 0:2].values
-            fisher_table = fisher_data.to_string()
-
-            OR, pval = fisher.fishers_exact_test(fisher_data.iloc[0:2, 0:2].values)
-            # print(f"OR: {OR}, pval: {pval}")
-
-            # with open("test.txt", 'w') as f:
-            #     fish_table = fisher_data.to_string()
-            #     f.write("2x2 contingency table:\n")
-            #     f.write(fish_table)
-            #     f.write(f"\nFisher's exact test results:\n")
-            #     f.write(f"\n\nodds ratio: {OR}, pvalue: {pval}")
-
-            venn_diagram = VennDiagram(n_hpo_genes, len(genes), total_overlap)
-
-            if mode == "save": 
-                venn_diagram.save(Path(output_dir) / (trait + "_venn.png"))
-                save_fisher_results(Path(output_dir) / (trait + "_fisher_results.txt"), fisher_table, OR, pval)
-            else: 
-                venn_diagram.show()
-                print_fisher_results(fisher_table, OR, pval)
-            # plot_venn_diagram(n_hpo_genes, len(genes), total_overlap, mode)
+        if mode == "save": 
+            venn_diagram.save(Path(output_dir) / (trait + "_venn.png"))
+            save_fisher_results(Path(output_dir) / (trait + "_fisher_results.txt"), fisher_table, OR, pval)
+        else: 
+            venn_diagram.show()
+            print_fisher_results(fisher_table, OR, pval)
 
 
 if __name__ == "__main__":
