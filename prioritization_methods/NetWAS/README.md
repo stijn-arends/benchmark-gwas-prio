@@ -1,11 +1,8 @@
 # NetWAS - network-wide association study
 
-NetWas is a method to re-prioritize genes based on tissue-specific networks. It combines genes with nominally significant genome-wide association study (GWAS) P values and tissue-specific networks to identify disease-gene associations more accurately than GWAS alone. It provides a useful reprioritization of the genome in terms of phenotypic and functional association $^{[1]}$.
+NetWas is a method to re-prioritize genes based on tissue-specific networks. It combines genes with nominally significant genome-wide association study (GWAS) P values and tissue-specific networks to identify disease-gene associations more accurately than GWAS alone. It provides a useful reprioritization of the genome in terms of phenotypic and functional association [[1]](#references).
 
 webservice: https://hb.flatironinstitute.org/netwas 
-
-**[1]** Greene CS*, Krishnan A*, Wong AK*, Ricciotti E, Zelaya RA, Himmelstein DS, Zhang R, Hartmann BM, Zaslavsky E, Sealfon SC, Chasman DI, FitzGerald GA, Dolinski K, Grosser T, Troyanskaya OG. (2015). Understanding multicellular function and disease with human tissue-specific networks. Nature Genetics. [10.1038/ng.3259w](https://www.nature.com/articles/ng.3259).
-
 
 ## Getting Started
 
@@ -46,7 +43,9 @@ Inside the tratis section are all the results of NetWAS sepcified for different 
   </a>
 </div>
 
+## References
 
+**[1]** Greene CS*, Krishnan A*, Wong AK*, Ricciotti E, Zelaya RA, Himmelstein DS, Zhang R, Hartmann BM, Zaslavsky E, Sealfon SC, Chasman DI, FitzGerald GA, Dolinski K, Grosser T, Troyanskaya OG. (2015). Understanding multicellular function and disease with human tissue-specific networks. Nature Genetics. [10.1038/ng.3259w](https://www.nature.com/articles/ng.3259).
 
 
 
