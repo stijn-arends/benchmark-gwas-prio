@@ -56,7 +56,7 @@ class ArgumentParser:
 
         parser.add_argument('-v',
             '--version',
-            help='Displays the version number of the script and exitst',
+            help='Displays the version number of the script and exit',
             action='version')
 
         command_group = parser.add_mutually_exclusive_group(required=True)
@@ -115,6 +115,19 @@ class CLIArgValidator:
 
     @staticmethod
     def _check_arg_combination(output_arg, save_arg) -> None:
+        """
+        Check if the use has selected 'save mode' that they also provided an
+        output directory, if not exit the program.
+
+        :parameters
+        -----------
+        output_arg - boolean
+            output directory argument
+        save_arg - boolean
+            Save mode argument
+        """
+        print(f"Output Argument: {output_arg}")
+
         if save_arg and not output_arg:
             print("If the 'save' mode is provided please also provide a directory where the output can be stored using the -o or --ouput argument.")
             sys.exit()
