@@ -4,7 +4,7 @@
 Edit feature files by adding a prefix to the file and columns names.
 This is to make each file unique, which is neccesary to run PoPs.
 
-Author - Stijn Arends
+Author - Stijn Arends, Raana Roohanitaziani
 Date - 15-6-2022
 """
 

@@ -2,9 +2,9 @@
 : '
 A bash script to download and manipulate features needed to run PoPs.
 
-Author - Stijn Arends
+Author - Stijn Arends, Raana Roohanitaziani
 Date - 15-6-2022
-contact - s.arends@st.hanze.nl
+contact - s.arends@st.hanze.nl, r.roohanitaziani@st.hanze.nl
 '
 
 repo=https://github.com/FinucaneLab/gene_features.git
