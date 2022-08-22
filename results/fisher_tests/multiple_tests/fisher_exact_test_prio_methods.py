@@ -3,24 +3,27 @@ Perform multiple fisher exact tests for a number of prioritization methods.
 """
 
 import sys
-from dataclasses import dataclass
-from pathlib import Path
-import numpy as np
-import pandas as pd
-import scipy.stats as stats
-import yaml
 import os
+# from dataclasses import dataclass
+from pathlib import Path
+# import numpy as np
+import pandas as pd
+# from scipy import stats
+# import scipy.stats as stats
+import yaml
+
 
 root_dir = os.path.abspath(os.path.join(
-                  os.path.dirname(__file__), 
+                  os.path.dirname(__file__),
                   os.pardir,
                   os.pardir))
 
 sys.path.insert(0, root_dir)
 
-from arg_parser import ArgumentParser, CLIArgValidator
 from utils.prioritization_methods import Downstreamer, Magma, Depict, PoPs, NetWAS
 from utils.fisher import HPO, FisherTest
+from arg_parser import ArgumentParser, CLIArgValidator
+
 
 __author__ = "Stijn Arends"
 __version__ = "v0.1"
@@ -30,7 +33,7 @@ __data__ = "9-8-2022"
 def get_config(file: Path) -> dict:
     """
     Read in config file and return it as a dictionary.
-    
+
     :parameter
     ----------
     file - str
@@ -44,13 +47,13 @@ def get_config(file: Path) -> dict:
     if not file.exists():
         raise FileExistsError(f"The file that was supplied does not exists: {file}")
 
-    with open(file, 'r') as stream:
+    with open(file, 'r', encoding="utf-8") as stream:
         config = yaml.safe_load(stream)
 
     return config
 
 
-def read_hpo_info(hpo_info) -> pd.DataFrame:
+def read_hpo_info(hpo_info: pd.DataFrame) -> pd.DataFrame:
     """
     Read in a CSV file containing information about HPO terms
     and related GWAS traits.
@@ -66,7 +69,7 @@ def read_hpo_info(hpo_info) -> pd.DataFrame:
 
 def make_out_dir(path: Path) -> None:
     """
-    Create a directory (if it does not exsit yet) to store the 
+    Create a directory (if it does not exsit yet) to store the
     data.
 
     :parameter
@@ -100,7 +103,9 @@ def write_out_data(data: pd.DataFrame, file: Path) -> None:
 
 
 def main():
-    
+    """
+    Run the program.
+    """
     arg_parse = ArgumentParser()
 
     config_file = arg_parse.get_argument("c")
@@ -119,7 +124,8 @@ def main():
     hpo_data = config["hpo_data"]
     hpo_info_data = read_hpo_info(Path(config["hpo_info"]))
 
-    methods = {"NetWAS": NetWAS, "PoPs": PoPs, "DEPICT": Depict, "Downstreamer": Downstreamer, "MAGMA":Magma}
+    methods = {"NetWAS": NetWAS, "PoPs": PoPs, "DEPICT": Depict,
+                "Downstreamer": Downstreamer, "MAGMA":Magma}
 
     hpo = HPO(database=hpo_data)
     fisher = FisherTest()
@@ -132,14 +138,15 @@ def main():
 
         method_data, genes = method_instance.read_data(file)
 
-        overlap_hpo, overlap_genes, total_overlap = method_instance.get_overlap(hpo.hpo_data, genes)
+        overlap_hpo, overlap_genes, _ = method_instance.get_overlap(hpo.hpo_data, genes)
 
         overlap_method = method_instance.get_overlap_genes(method_data, overlap_genes)
 
-        sig_data_method, sig_genes = method_instance.filter_data(overlap_method)
+        _, sig_genes = method_instance.filter_data(overlap_method)
 
-        fish_results = method_instance.fisher.perform_fisher_exact_tests(overlap_hpo, sig_genes, hpo_info_data)
-        
+        fish_results = method_instance.fisher.perform_fisher_exact_tests(overlap_hpo,
+                                    sig_genes, hpo_info_data)
+
         out_file = out_dir / ("fisher_result_" + file.stem + ".csv")
 
         write_out_data(fish_results, out_file)

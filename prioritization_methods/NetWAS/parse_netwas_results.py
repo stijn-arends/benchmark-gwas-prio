@@ -6,7 +6,6 @@ Module for parsing the results produced by NetWAS.
 
 from pathlib import Path
 import pandas as pd
-
 from arg_parser import ArgumentParser, CLIArgValidator
 
 
@@ -29,13 +28,14 @@ class NetWasParser:
     def parse_data(self, threshold: float, gene_list: bool) -> None:
         """
         Parse a NetWas file to extract only the nominal positive genes.
-        
+
         :paramters
         ----------
         threshold - float
             Threshold to decide which gene to keep - used on the NetWas score column
         gene_list - Boolean
-            Flag specifying wheter or not to write out all the columns or only the gene names - default = False
+            Flag specifying wheter or not to write out all the columns or only the gene names
+                - default = False
                 True - only gene names
                 False - all columns
         """
@@ -50,17 +50,19 @@ class NetWasParser:
     @staticmethod
     def read_netwas_data(file: Path) -> pd.DataFrame:
         """
-        Read in a NetWas result file 
+        Read in a NetWas result file
 
         :parameters
         -----------
         file - Path
             File containing NetWas results
         """
-        df = pd.read_csv(file, sep=None, skiprows=28, names= ["Gene", "label", "score"], engine='python')
+        df = pd.read_csv(file, sep=None, skiprows=28,
+                        names= ["Gene", "label", "score"], engine='python')
         return df
 
-    def get_prioritized_genes(self, df:pd.DataFrame, threshold:float) -> pd.DataFrame:
+    @staticmethod
+    def get_prioritized_genes(df:pd.DataFrame, threshold:float) -> pd.DataFrame:
         """
         Only keep the genes with a NetWas score higher or equal to the threshold
 
@@ -94,9 +96,10 @@ class NetWasParser:
         self.make_data_dir(output_file)
         data.to_csv(output_file, sep="\t", index=False, header=False)
 
-    def make_data_dir(self, dir: Path) -> None:
+    @staticmethod
+    def make_data_dir(directory: Path) -> None:
         """
-        Create a directory (if it does not exisit yet) to store the 
+        Create a directory (if it does not exisit yet) to store the
         data.
 
         :Excepts
@@ -105,12 +108,15 @@ class NetWasParser:
             The directory already exists
         """
         try:
-            dir.parent.mkdir(parents=True, exist_ok=False)
+            directory.parent.mkdir(parents=True, exist_ok=False)
         except FileExistsError:
             pass
 
 
 def main():
+    """
+    Run the main program.
+    """
     arg_parser = ArgumentParser()
     arg_validator = CLIArgValidator()
     file = arg_parser.get_argument('file')

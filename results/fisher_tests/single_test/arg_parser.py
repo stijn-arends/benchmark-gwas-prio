@@ -36,7 +36,8 @@ class ArgumentParser:
         parser - ArgumentParser
         """
         parser = argparse.ArgumentParser(prog=os.path.basename(__file__),
-            description="Python module for performing fisher exact tests for gene prioritization methods",
+            description="Python module for performing fisher exact tests" \
+                "for gene prioritization methods",
             epilog="Contact: stijnarend@live.nl")
 
         parser.version = __version__
@@ -90,6 +91,17 @@ class ArgumentParser:
             value = None
         return value
 
+    def get_parser(self) -> argparse.ArgumentParser:
+        """
+        Get the argument parser
+
+        :returns
+        --------
+        parser - argparse.ArgumentParser
+            Argument parser
+        """
+        return self.parser
+
 
 class CLIArgValidator:
     """
@@ -97,24 +109,32 @@ class CLIArgValidator:
     """
 
     def validate_input_file(self, input_path: str) -> None:
-        input_path = Path(input_path)
-        self._validate_input_exists(input_path)
-
-    @staticmethod
-    def _validate_input_exists(input_path: Path) -> None:
         """
-        Check if a file exists. 
+        Validate the input files by checking if they actually exists.
 
         :parameters
         -----------
         input_path - str
             Path to a file
         """
+        input_path = Path(input_path)
+        self._validate_input_exists(input_path)
+
+    @staticmethod
+    def _validate_input_exists(input_path: Path) -> None:
+        """
+        Check if a file exists.
+
+        :parameters
+        -----------
+        input_path - Path
+            Path to a file
+        """
         if not input_path.is_file():
             raise FileNotFoundError(f'Input file does not exist!: {input_path}')
 
     @staticmethod
-    def _check_arg_combination(output_arg, save_arg) -> None:
+    def check_arg_combination(output_arg, save_arg) -> None:
         """
         Check if the use has selected 'save mode' that they also provided an
         output directory, if not exit the program.
@@ -127,5 +147,6 @@ class CLIArgValidator:
             Save mode argument
         """
         if save_arg and not output_arg:
-            print("If the 'save' mode is provided please also provide a directory where the output can be stored using the -o or --ouput argument.")
+            print("If the 'save' mode is provided please also provide a" \
+                "directory where the output can be stored using the -o or --ouput argument.")
             sys.exit()

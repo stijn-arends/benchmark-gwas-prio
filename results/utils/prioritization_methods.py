@@ -1,28 +1,54 @@
 """
-Module that contains functionality to process data from 
+Module that contains functionality to process data from
 different prioritization methods to be able to perform fisher exact tests.
 """
 
-from dataclasses import dataclass
-from pathlib import Path
-import numpy as np
-import pandas as pd
 from abc import ABC, abstractmethod
-import scipy.stats as stats
+import pandas as pd
+from scipy import stats
+
 
 class PrioritizationMethod(ABC):
+    """
+    Base class for a prioritization method.
+    """
 
     @abstractmethod
-    def read_data(self):
-        pass
+    def read_data(self, data):
+        """
+        Read in data from a CSV file.
+
+        :parameters
+        -----------
+        data - Path
+            File containing the data
+        """
 
     @abstractmethod
-    def filter_data(self):
-        pass
-    
+    def filter_data(self, data, threshold):
+        """
+        Filter the data by only keeping the 'significant' genes.
+
+        :parameters
+        -----------
+        data - pd.DataFrame
+            Data
+        threshold - float
+            Threshold to determine what significant is.
+        """
+
     @abstractmethod
-    def get_overlap_genes(self):
-        pass
+    def get_overlap_genes(self, data, genes):
+        """
+        Get the data that overlaps with a list of specified genes.
+
+        :parameters
+        -----------
+        data - pd.DataFrame
+            Data
+        genes - pd.Series
+            List of gene IDs
+        """
 
     def get_overlap(self, hpo_data, genes):
         """
@@ -50,13 +76,16 @@ class PrioritizationMethod(ABC):
 
         # Only keep the genes that overlap with HPO
         overlap_genes = genes[genes.isin(overlapping_genes)]
-        
+
         # Only keep releveant HPO data
         overlap_hpo = hpo_data[hpo_data.index.isin(overlapping_genes)]
         return overlap_hpo, overlap_genes, total_overlap
 
 
 class NetWAS(PrioritizationMethod):
+    """
+    Subclass for the gene prioritization method NetWAS.
+    """
 
     def __init__(self, hpo, fisher):
         self.hpo = hpo
@@ -125,6 +154,9 @@ class NetWAS(PrioritizationMethod):
 
 
 class PoPs(PrioritizationMethod):
+    """
+    Subclass for the gene prioritization method PoPs.
+    """
 
     def __init__(self, hpo, fisher):
         self.hpo = hpo
@@ -168,7 +200,7 @@ class PoPs(PrioritizationMethod):
         """
         overlap_pops = data[data["ENSGID"].isin(genes)]
         return overlap_pops
-    
+
     def filter_data(self, data, threshold=500):
         """
         Filter the data by only keeping the 'significant' genes.
@@ -193,6 +225,9 @@ class PoPs(PrioritizationMethod):
 
 
 class Depict(PrioritizationMethod):
+    """
+    Subclass for the gene prioritization method Depict
+    """
 
     def __init__(self, hpo, fisher):
         self.hpo = hpo
@@ -239,7 +274,7 @@ class Depict(PrioritizationMethod):
         """
         overlap_depict = data[data["Ensembl Gene ID"].isin(genes)]
         return overlap_depict
-    
+
     def filter_data(self, data, threshold = None):
         """
         Filter the data by only keeping the 'significant' genes.
@@ -264,6 +299,9 @@ class Depict(PrioritizationMethod):
 
 
 class Downstreamer(PrioritizationMethod):
+    """
+    Subclass for the gene prioritization method Downstreamer.
+    """
 
     def __init__(self, hpo, fisher):
         self.hpo = hpo
@@ -307,7 +345,7 @@ class Downstreamer(PrioritizationMethod):
         """
         overlap_downstreamer = data[data["Gene ID"].isin(genes)]
         return overlap_downstreamer
-    
+
     def filter_data(self, data, threshold = None):
         """
         Filter the data by only keeping the 'significant' genes.
@@ -332,6 +370,9 @@ class Downstreamer(PrioritizationMethod):
 
 
 class Magma(PrioritizationMethod):
+    """
+    Subclass for the gene prioritization method Magma.
+    """
 
     def __init__(self, hpo, fisher):
         self.hpo = hpo
@@ -375,7 +416,7 @@ class Magma(PrioritizationMethod):
         """
         overlap_magma = data[data["GENE"].isin(genes)]
         return overlap_magma
-    
+
     def filter_data(self, data, threshold=1.084e-4):
         """
         Filter the data by only keeping the 'significant' genes.

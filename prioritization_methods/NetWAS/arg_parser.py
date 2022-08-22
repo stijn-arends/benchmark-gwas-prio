@@ -18,12 +18,12 @@ class ArgumentParser:
     """
 
     def __init__(self) -> None:
-        parser = self._create_argument_parser()
+        self.parser = self._create_argument_parser()
         # Print help if no arguments are supplied and stop the program
         if len(sys.argv) == 1:
-            parser.print_help(sys.stderr)
+            self.parser.print_help(sys.stderr)
             sys.exit(1)
-        self.arguments = parser.parse_args()
+        self.arguments = self.parser.parse_args()
 
     @staticmethod
     def _create_argument_parser():
@@ -57,7 +57,8 @@ class ArgumentParser:
             required=True)
 
         parser.add_argument('--gene_list', dest="gene_list",
-            help='Specify if only gene symbols are written out. Default is NetWas file with filtered genes',
+            help='Specify if only gene symbols are written out."\
+                "Default is NetWas file with filtered genes',
             action="store_true")
 
         parser.add_argument('-v',
@@ -72,10 +73,9 @@ class ArgumentParser:
         Method to get an input argument.
         :parameters
         -----------
-        argument_key - str 
+        argument_key - str
             Full command line argument (so --config for the configuration file argument).
 
-    
         :returns
         --------
         value - List or boolean
@@ -86,6 +86,16 @@ class ArgumentParser:
             value = None
         return value
 
+    def get_parser(self) -> argparse.ArgumentParser:
+        """
+        Get the argument parser
+
+        :returns
+        --------
+        parser - argparse.ArgumentParser
+            Argument parser
+        """
+        return self.parser
 
 class CLIArgValidator:
     """
@@ -93,6 +103,15 @@ class CLIArgValidator:
     """
 
     def validate_input_file(self, input_path: str) -> None:
+        """
+        Validate the input files by checking if they actually exists
+        and the which extention they have.
+
+        :parameters
+        -----------
+        input_path - str
+            Path to a file
+        """
         input_path = Path(input_path)
         self._validate_input_exists(input_path)
         self._validate_input_extension(input_path)
@@ -100,7 +119,7 @@ class CLIArgValidator:
     @staticmethod
     def _validate_input_exists(input_path: Path) -> None:
         """
-        Check if a file exists. 
+        Check if a file exists.
 
         :parameters
         -----------
@@ -113,7 +132,7 @@ class CLIArgValidator:
     @staticmethod
     def _validate_input_extension(input_path: Path) -> None:
         """
-        Check if a file has the right extension. 
+        Check if a file has the right extension.
 
         :parameters
         -----------
