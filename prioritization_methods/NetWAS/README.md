@@ -5,12 +5,17 @@ NetWas is a method to re-prioritize genes based on tissue-specific networks. It 
 webservice: https://hb.flatironinstitute.org/netwas 
 
 ## Getting Started
+* * *
 
+### Input of NetWAS
+NetWAS requires as input a GWAS result file, with per-gene p-values. These gene p-values can be calculated using versatile gene-based association study (VEGAS), pseq or forge. During this study VEGAS was used to calculate the gene p-values. In the [`process_GWAS_data/`](process_GWAS_data/) folder information on how to install VEGAS on your system is located as well as a script which is able to prepare GWAS summary statistics files to be able to be used for VEGAS.
+
+### Processing results of NetWAS
 The following scripts are used to process the results produced by NetWAS:
 1. parse_netwas_results.py
 2. convert_gene_id_ensembl_id.R
 
-The results of NetWAS need to be processed before they can be used for analysis. First of all NetWAS adds a header to the output files, as can be seen [here](#example-output-netwas), this header needs to removed to be able to analyse the data. This can be done using the [`parse_netwas_results.py`](parse_netwas_results.py) script, optionally it can also be used to filter out the gene symbols. 
+The results of NetWAS need to be processed before they can be used for analysis. First of all NetWAS adds a header to the output files, as can be seen [here](#example-output-netwas), this header needs to removed to be able to analyse the data. This can be done using the [`parse_netwas_results.py`](parse_netwas_results.py) script, optionally it can also be used to filter out the genes based on netwas score and to extract only the gene symbols. 
 
 To check how the python script works you can look at the help function:
 
