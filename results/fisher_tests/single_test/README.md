@@ -1,7 +1,7 @@
 ## Description 
 * * *
 
-The scripts located in this directory can be used to perform a fisher's exact test on the results of a gene prioritization method to find out if the prioritized genes are enriched for genes that are associated with a relevant HPO term.
+The scripts located in this directory can be used to perform a fisher's exact test on the results of a gene prioritization method to find out if the prioritized genes are enriched for genes that are associated with a relevant HPO term. Additionaly, venn diagrams displaying the overlap between genes for the specified HPO term and prioritized genes produced by the gene prioritization method will be produced([example](#venn-diagram)).
 
 
 ## Getting Started
@@ -40,3 +40,10 @@ traits:
 
 hpo_data: "/path/to/hpo_database.txt.gz"
 ```
+
+## Venn Diagram
+* * *
+
+This is an example of a venn diagram which was produced for the results of NetWAS for the GWAS trait height using `'HP:0000002'` as a HPO term:
+
+![venn diagram height netwas](../../../images/venn_diagrams/venn_diagram_height_netwas.png)
