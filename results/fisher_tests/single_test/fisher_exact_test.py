@@ -159,7 +159,8 @@ def main():
     cli_validator.validate_input_file(config_file)
     cli_validator._check_arg_combination(output_dir, save_mode)
 
-    make_out_dir(Path(output_dir))
+    if output_dir:
+        make_out_dir(Path(output_dir))
 
     config = get_config(Path(config_file))
 

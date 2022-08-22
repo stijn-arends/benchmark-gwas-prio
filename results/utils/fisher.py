@@ -1,13 +1,18 @@
+"""
+A  module that provides other modules functionality to perform the fisher exact test
+specifically on results of gene prioritization methods.
+"""
+
 from dataclasses import dataclass
 from pathlib import Path
 import numpy as np
 import pandas as pd
 import scipy.stats as stats
+from typing import Tuple
 
 @dataclass
 class HPO:
     database: Path
-    # hpo_info: Path
 
     def __post_init__(self) -> None:
         """
@@ -15,14 +20,31 @@ class HPO:
         """
         self.hpo_data = pd.read_csv(self.database, compression='gzip', sep="\t")
         self.hpo_data.set_index('-', inplace=True)
-        # self.hpo_info_data = pd.read_csv(self.hpo_info, sep=",")
 
 
-    def get_data_hpo_term(self, hpo_data, hpo_term):
+    def get_data_hpo_term(self, hpo_data: pd.DataFrame, hpo_term: str) -> Tuple[pd.DataFrame, pd.Series]:
+        """
+        Subset the entire HPO database to get the data for a 
+        specific HPO term. Where the columns of the HPO database are
+        different HPO terms and the index consists of ensembl gene IDs.
+
+        :parameters
+        -----------
+        hpo_data - pd.DataFrame
+            HPO metric inside a pandas data frame
+        hpo_term - str
+            ID of HPO term (e.g. HP:00002)
+
+        :returns
+        --------
+        data_hpo_term - pd.DataFrame
+            HPO data for one HPO term
+        genes - pd.Series
+            List of genes for HPO term
+        """
         data_hpo_term = hpo_data.loc[hpo_data[hpo_term] == 1, hpo_term]
         genes = data_hpo_term.index
         return data_hpo_term, genes
-
 
 
 class FisherTest:
@@ -57,7 +79,23 @@ class FisherTest:
         metrix.index = ["No GWAS", "Yes GWAS", "sum"]
         return metrix
 
-    def fishers_exact_test(self, fisher_data):
+    def fishers_exact_test(self, fisher_data: pd.DataFrame) -> Tuple[float, float]:
+        """
+        Perform the fisher's exact test on a 2x2 contingency table.
+
+        :parameters
+        -----------
+        fisher_data - pd.DataFrame
+            A 2x2 contingency table
+
+        :returns
+        --------
+        odds_ratio - float
+            Odds ratio of the fisher's exact test indicating the direction of the enrichment
+            (if there is one)
+        p_val - float
+            P value indicating if there is a significant enrichment.
+        """
         odds_ratio, p_val = stats.fisher_exact(fisher_data)
         return odds_ratio, p_val
 

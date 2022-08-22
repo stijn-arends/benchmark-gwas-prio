@@ -23,7 +23,7 @@ bash download_features.sh
 
 The raw features will be downloaded and placed in a new directory inside the current working directory.
 
-> WARNING: the raw features are large files so make sure that there is enough storage.
+> WARNING: the raw features take up a decent amount of disc space so make sure that there is enough storage.
 
 
 ## References

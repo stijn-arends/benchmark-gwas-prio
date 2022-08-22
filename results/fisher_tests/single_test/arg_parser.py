@@ -126,8 +126,6 @@ class CLIArgValidator:
         save_arg - boolean
             Save mode argument
         """
-        print(f"Output Argument: {output_arg}")
-
         if save_arg and not output_arg:
             print("If the 'save' mode is provided please also provide a directory where the output can be stored using the -o or --ouput argument.")
             sys.exit()
