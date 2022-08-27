@@ -18,8 +18,15 @@ import sys
 __version__ = "V0.1"
 
 class EditFeatureFiles:
+    """
+    Class that is used to process raw feature files that are needed
+    to run the gene prioritization method PoPs.
 
-    def __init__(self, folder, prefix):
+    The files need to have a common prefix to the name, and all
+    column names should be unique. This is what this class does.
+    """
+
+    def __init__(self, folder, prefix) -> None:
         self.folder = Path(folder)
         self.prefix = prefix
 
@@ -186,7 +193,14 @@ class CommandLineArgumentsValidator:
     Class to check if arguments are valid.
     """
 
-    def validate_input_path(self, input_path):
+    def validate_input_path(self, input_path) -> None:
+        """
+        Validate the input files by checking if they actually exists.
+        :parameters
+        -----------
+        input_path - str
+            Path to a file
+        """
         self._validate_input_exists(input_path)
 
     @staticmethod
@@ -203,6 +217,9 @@ class CommandLineArgumentsValidator:
 
 
 def main():
+    """
+    Run the main program
+    """
 
     cla_parser = ArgumentParser()
     folder = cla_parser.get_argument('directory')
@@ -222,4 +239,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
